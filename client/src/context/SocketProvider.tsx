@@ -14,7 +14,7 @@ type SocketProviderProps = {
 };
 
 function connect() {
-  return io("ws://192.168.2.104:3001");
+  return io("ws://192.168.2.100:3001");
 }
 
 export default function SocketProvider(props: SocketProviderProps) {
