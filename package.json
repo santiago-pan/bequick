@@ -3,7 +3,8 @@
   "scripts": {
     "client-install": "cd client && npm install",
     "server-install": "cd server && npm install",
-    "start-client:dev": "cd client && npm run start",
+    "start-client": "cd client && npm run start",
+    "start-client:dev": "cd client && npm run start:dev",
     "start-server": "cd server && npm run start",
     "start-server:dev": "cd server && npm run start:dev",
     "install-all-deps": "concurrently \"npm run server-install\" \"npm run client-install\"",
@@ -13,7 +14,7 @@
     "test:watch:server": "cd server && yarn test:watch",
     "test": "concurrently \"yarn test:client\" \"yarn test:server\"",
     "test:watch": "concurrently \"yarn test:client\" \"yarn test:watch:server\"",
-    "start":"concurrently \"npm run start-client:dev\" \"npm run start-server\""
+    "start":"npm run start-server"
   },
   "dependencies": {
     "@emotion/react": "^11.10.0",

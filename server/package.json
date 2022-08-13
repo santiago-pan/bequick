@@ -7,7 +7,7 @@
     "build": "rimraf ./build && tsc",
     "start:dev": "nodemon -w",
     "start:pm2": "npm run build && pm2 restart build/server.js",
-    "start": "npm run build && node build/server.js",
+    "start": "npm run --production build && node build/server.js",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
