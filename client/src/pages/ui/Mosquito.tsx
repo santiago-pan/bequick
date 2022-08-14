@@ -7,6 +7,7 @@ export default function Mosquito(props: {
 }) {
   return (
     <img
+      alt="click-item"
       onClick={() => props.select()}
       style={{
         position: "relative",

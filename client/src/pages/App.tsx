@@ -2,14 +2,13 @@ import {
   Box,
   ButtonGroup,
   Container,
-  createTheme,
   TextField,
   Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
-import { useLocation, useRoutes } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   EmailIcon,
   EmailShareButton,
@@ -89,16 +88,6 @@ function App(props: {}) {
 
   const [gameScreen, setGameScreen] = useState<GameScreen | null>(null);
 
-  function newGame() {
-    if (socket) {
-      setGameScreen({
-        screen: "new_game_create",
-        socket,
-        createGame,
-      });
-    }
-  }
-
   // Socket messages
   useEffect(() => {
     if (socket) {
@@ -160,7 +149,15 @@ function App(props: {}) {
     if (gameId === null && gameScreen === null) {
       setGameScreen({
         screen: "new_game",
-        newGame,
+        newGame: () => {
+          if (socket) {
+            setGameScreen({
+              screen: "new_game_create",
+              socket,
+              createGame,
+            });
+          }
+        },
       });
     }
     if (gameId && gameScreen && gameScreen.screen === "new_game_create") {
@@ -272,6 +269,7 @@ function App(props: {}) {
         maxWidth="md"
       >
         <img
+          alt="logo"
           src={`qc-logo.png`}
           width={64}
           height={64}
