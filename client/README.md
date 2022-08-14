@@ -1,1 +1,3 @@
-# quick-click
+# Quick click
+
+Demo client application
