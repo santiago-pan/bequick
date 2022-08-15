@@ -35,8 +35,8 @@
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "deploy": "npm run build && aws s3 sync build/. s3://bequick.pancarneiro.com/ --profile santiago"
-
+    "invalidate": "aws cloudfront create-invalidation --distribution-id E1C4L23RJ4970B --paths / --profile santiago",
+    "deploy": "npm run build && aws s3 sync --acl public-read build/. s3://bequick.pancarneiro.com/ --profile santiago && npm run invalidate"
   },
   "eslintConfig": {
     "extends": [
