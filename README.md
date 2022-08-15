@@ -11,10 +11,10 @@ The reaction time is measured independently to the connection lag or device perf
 
 ## TODO
 
-- Rename 'gameid' by just 'id'
 - If a URL has id, chek with the server that the game is not finished or ongoing
 - If the game is finished or ongoing redirect to some error page or to starting page
 
 DONE:
 - Allow multiple and independent games: getSockets([ids])
 - Stype the Game screen
+- Rename 'gameid' by just 'id'

@@ -77,7 +77,7 @@ function startGame(socket: Socket, gameId: string) {
 }
 
 function App(props: {}) {
-  const queryGameId = useQuery().get("gameid");
+  const queryGameId = useQuery().get("id");
   const [gameId, setGameId] = useState<string | null>(queryGameId);
   const [clicker, setClicker] = useState<ClickerPosition | null>(null);
   const [gameIsOver, setGameIsOver] = useState<boolean>(false);
@@ -394,7 +394,7 @@ function NewGameCreate(
 function NewGameShare(
   props: Extract<GameScreen, { screen: "new_game_share" }>
 ) {
-  const shareUrl = `http://192.168.2.104:3000/?gameid=${props.gameId}`;
+  const shareUrl = `https://bequick.pancarneiro.com/?id=${props.gameId}`;
   const title = "";
   const allPlayersIn =
     props.playersCount &&
