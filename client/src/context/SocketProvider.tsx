@@ -14,7 +14,7 @@ type SocketProviderProps = {
 };
 
 function connect() {
-  return io("ws://bequick-env.eba-mefypc5p.eu-central-1.elasticbeanstalk.com/");
+  return io("wss://s2.pancarneiro.com");
 }
 
 export default function SocketProvider(props: SocketProviderProps) {

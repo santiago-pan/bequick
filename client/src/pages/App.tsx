@@ -29,7 +29,7 @@ import {
   ServerAction,
   ServerEvent,
 } from "../types";
-import forest from "./../assets/images/forest1.webp";
+import forest from "./../assets/images/forest1.jpg";
 import "./App.css";
 import { ClickerPosition, GameScreen, PlayersCount } from "./AppTypes";
 import Mosquito from "./ui/Mosquito";
