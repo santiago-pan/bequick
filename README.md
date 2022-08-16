@@ -23,14 +23,25 @@ The infrastructure uses the following AWS services:
 ### JS client bundle
 
 AWS S3 bucket
+
 Cloudfront distribution
+
 Route 53
 
 ### NodeJS server
 
 AWS EC2 instance using Elastic Beanstalk
+
 Cloudfront distribution
+
 Route 53
+
+### Demo
+
+A demo can be found here:
+
+https://bequick.pancarneiro.com/
+
 
 ## TODO
 
