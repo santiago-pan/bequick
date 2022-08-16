@@ -29,7 +29,7 @@ export default function GameOver(props: Props) {
         }}
       >
         <Typography color={"white"} variant="body1">
-          Game is over.
+          Game is over
           <br />
           {`Your score is ${wins}`}
         </Typography>
