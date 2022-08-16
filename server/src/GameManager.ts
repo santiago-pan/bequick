@@ -242,10 +242,11 @@ export function createGame(
 }
 
 export function getRandomCoord(): Coords {
-  const MARGIN = 5;
+  const MARGIN_X = 5;
+  const MARGIN_Y = 10;
   return {
-    x: Math.max(MARGIN, Math.random() * (100 - MARGIN)),
-    y: Math.max(MARGIN, Math.random() * (100 - MARGIN)),
+    x: Math.max(MARGIN_X, Math.random() * (100 - MARGIN_X)),
+    y: Math.max(MARGIN_Y, Math.random() * (100 - MARGIN_Y)),
   };
 }
 
