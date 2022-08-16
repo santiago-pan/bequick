@@ -1,20 +1,39 @@
-# Quick click
+# Quick Click
 
-Quick click is a frameworks that allows to measure reaction times for a group of user.
+Quick Click is a framework for measuring reaction times for a group of users.
 
-The framework can be executed in different flavous like in this case, trough a game.
+The framework can be executed in different flavors like in this case, through a game Be Quick.
+
+Based on the reaction times, winer/s can selected and provided with rewards.
 
 ## How it works
 
-Quick click uses websockets under the hood to communicate the client frontend applications with the server.
+Quick click uses websockets under the hood to communicate client applications with the server.
+
 The reaction time is measured independently to the connection lag or device performance.
+
+## Deployment
+
+The infrastructure uses the following AWS services:
+- S3
+- EC2
+- Cloudfront
+- Route 53
+
+### JS client bundle
+
+AWS S3 bucket
+
+### NodeJS server
+
+AWS EC2 instance using Elastic Beanstalk
 
 ## TODO
 
 - If a URL has id, chek with the server that the game is not finished or ongoing
 - If the game is finished or ongoing redirect to some error page or to starting page
 
-DONE:
+## DONE
 - Allow multiple and independent games: getSockets([ids])
 - Stype the Game screen
 - Rename 'gameid' by just 'id'

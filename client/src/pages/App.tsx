@@ -1,24 +1,6 @@
-import {
-  Box,
-  ButtonGroup,
-  Container,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Button from "@mui/material/Button";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import QRCode from "react-qr-code";
+import { Box, Container } from "@mui/material";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  EmailIcon,
-  EmailShareButton,
-  FacebookIcon,
-  FacebookShareButton,
-  LineIcon,
-  LineShareButton,
-  WhatsappIcon,
-  WhatsappShareButton,
-} from "react-share";
 import { Socket } from "socket.io-client";
 import { SocketContext } from "../context/SocketProvider";
 import { assertNever } from "../tools/tools";
@@ -29,16 +11,25 @@ import {
   ServerAction,
   ServerEvent,
 } from "../types";
-import forest from "./../assets/images/forest1.jpg";
-import "./App.css";
-import { ClickerPosition, GameScreen, PlayersCount } from "./AppTypes";
-import Mosquito from "./ui/Mosquito";
 
-// Does actually call the server to create a new game
+import "./App.css";
+import {
+  ClickerPosition,
+  DEFAULT_NUM_PLAYERS,
+  DEFAULT_NUM_ROUNDS,
+  GameScreen,
+  PlayersCount,
+} from "./AppTypes";
+import Game from "./screens/Game";
+import { JoinGame, JoinGameWait } from "./screens/JoinGame";
+import NewGameCreate from "./screens/NewGameCreate";
+import NewGameShare from "./screens/NewGameShare";
+import StartScreen from "./screens/StartScreen";
+
 function createGame(
   socket: Socket,
-  numPlayers: string = "2",
-  numRounds: string = "2"
+  numPlayers: string = DEFAULT_NUM_PLAYERS,
+  numRounds: string = DEFAULT_NUM_ROUNDS
 ) {
   const action: ClientEvent = {
     action: ClientAction.NewGame,
@@ -76,7 +67,7 @@ function startGame(socket: Socket, gameId: string) {
   socket.emit(socket.id, action);
 }
 
-function App(props: {}) {
+function App() {
   const queryGameId = useQuery().get("id");
   const [gameId, setGameId] = useState<string | null>(queryGameId);
   const [clicker, setClicker] = useState<ClickerPosition | null>(null);
@@ -96,6 +87,8 @@ function App(props: {}) {
           setGameIsOver(true);
         }
         if (arg.action === ServerAction.PlayersIn) {
+          console.log("player in: ", arg);
+
           setPlayersCount({
             totalPlayers: arg.payload.totalPlayers,
             playersIn: arg.payload.playersIn,
@@ -148,7 +141,7 @@ function App(props: {}) {
     }
     if (gameId === null && gameScreen === null) {
       setGameScreen({
-        screen: "new_game",
+        screen: "start_screen",
         newGame: () => {
           if (socket) {
             setGameScreen({
@@ -217,7 +210,7 @@ function App(props: {}) {
         });
       }
     }
-    if (gameId && gameScreen && gameScreen.screen === "new_game") {
+    if (gameId && gameScreen && gameScreen.screen === "start_screen") {
       setGameScreen({
         screen: "new_game_create",
         socket,
@@ -258,37 +251,7 @@ function App(props: {}) {
     return screen;
   }
 
-  return (
-    <>
-      <Container
-        sx={{
-          height: "100vh",
-          textAlign: "center",
-          paddingTop: 0,
-        }}
-        maxWidth="md"
-      >
-        <img
-          alt="logo"
-          src={`qc-logo.png`}
-          width={64}
-          height={64}
-          style={{ padding: "5vh" }}
-        />
-
-        <Box
-          textAlign="center"
-          sx={{
-            borderRadius: 1,
-            maxWidth: "md",
-            justifyContent: "center",
-          }}
-        >
-          {screen}
-        </Box>
-      </Container>
-    </>
-  );
+  return <>{AppContainer(screen)}</>;
 }
 
 function useQuery() {
@@ -296,26 +259,14 @@ function useQuery() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-function resetTimer(timeRef: React.MutableRefObject<number>) {
-  const d = new Date();
-  timeRef.current = d.getTime();
-}
-
-function getTimeDiff(timeRef: React.MutableRefObject<number>) {
-  const d = new Date();
-  return d.getTime() - timeRef.current;
-}
-
 function ScreenSelector(gameScreen: GameScreen) {
   switch (gameScreen.screen) {
-    case "new_game":
-      return <NewGameScreen {...gameScreen} />;
+    case "start_screen":
+      return <StartScreen {...gameScreen} />;
     case "new_game_create":
       return <NewGameCreate {...gameScreen} />;
     case "new_game_share":
       return <NewGameShare {...gameScreen} />;
-    case "new_game_start":
-      return <NewGameStart />;
     case "join_game":
       return <JoinGame {...gameScreen} />;
     case "join_game_wait":
@@ -327,292 +278,35 @@ function ScreenSelector(gameScreen: GameScreen) {
   }
 }
 
-function NewGameScreen(props: Extract<GameScreen, { screen: "new_game" }>) {
+function AppContainer(screen: JSX.Element) {
   return (
-    <>
-      <ButtonGroup size="large" orientation="vertical">
-        <Button
-          size="large"
-          variant="contained"
-          sx={{
-            m: 1,
-          }}
-          onClick={() => props.newGame()}
-        >
-          Start New Game
-        </Button>
-      </ButtonGroup>
-    </>
-  );
-}
+    <Container
+      sx={{
+        height: "100vh",
+        textAlign: "center",
+        paddingTop: 0,
+      }}
+      maxWidth="md"
+    >
+      <img
+        alt="logo"
+        src={`qc-logo.png`}
+        width={64}
+        height={64}
+        style={{ padding: "5vh" }}
+      />
 
-function NewGameCreate(
-  props: Extract<GameScreen, { screen: "new_game_create" }>
-) {
-  const [players, setPlayers] = useState<string>("2");
-  const [rounds, setRounds] = useState<string>("2");
-  return (
-    <>
-      <ButtonGroup size="large" orientation="vertical">
-        <TextField
-          sx={{
-            m: 1,
-          }}
-          id="outlined-basic"
-          label="Players"
-          variant="outlined"
-          value={players}
-          type="number"
-          onChange={(v) => setPlayers(v.currentTarget.value)}
-        />
-        <TextField
-          sx={{
-            m: 1,
-          }}
-          id="outlined-basic"
-          label="Rounds"
-          variant="outlined"
-          value={rounds}
-          type="number"
-          onChange={(v) => setRounds(v.currentTarget.value)}
-        />
-        <Button
-          size="large"
-          variant="contained"
-          sx={{
-            m: 1,
-          }}
-          onClick={() => props.createGame(props.socket, players, rounds)}
-        >
-          Create Game
-        </Button>
-      </ButtonGroup>
-    </>
-  );
-}
-
-function NewGameShare(
-  props: Extract<GameScreen, { screen: "new_game_share" }>
-) {
-  const shareUrl = `https://bequick.pancarneiro.com/?id=${props.gameId}`;
-  const title = "";
-  const allPlayersIn =
-    props.playersCount &&
-    props.playersCount.playersIn === props.playersCount.totalPlayers
-      ? true
-      : false;
-  return (
-    <>
-      <Typography m={2} variant="body1">
-        Share with the other player/s.
-      </Typography>
-      <Box m={2}>
-        <QRCode size={120} value={shareUrl} />
-      </Box>
-      <Box>
-        <WhatsappShareButton url={shareUrl} title={title}>
-          <WhatsappIcon size={48} />
-        </WhatsappShareButton>
-        <LineShareButton url={shareUrl} title={title}>
-          <LineIcon size={48} />
-        </LineShareButton>
-        <FacebookShareButton url={shareUrl} quote={title}>
-          <FacebookIcon size={48} />
-        </FacebookShareButton>
-        <EmailShareButton
-          url={shareUrl}
-          subject={"Quick click game"}
-          body={shareUrl}
-        >
-          <EmailIcon size={48} />
-        </EmailShareButton>
-      </Box>
-      {!allPlayersIn && (
-        <>
-          <Typography m={2} variant="body1">
-            Waiting for players to join.
-          </Typography>
-          <Typography m={2} variant="body1">
-            {`${props.playersCount?.playersIn ?? 0} of ${
-              props.playersCount?.totalPlayers ?? 0
-            }`}
-          </Typography>
-        </>
-      )}
-      {allPlayersIn && (
-        <>
-          <Typography m={2} variant="body1">
-            All players in.
-          </Typography>
-          <Button
-            size="large"
-            variant="contained"
-            sx={{
-              m: 1,
-            }}
-            onClick={() => props.startGame(props.socket, props.gameId)}
-          >
-            Start Game
-          </Button>
-        </>
-      )}
-    </>
-  );
-}
-
-function NewGameStart() {
-  return <>NewGameStart</>;
-}
-
-function JoinGame(props: Extract<GameScreen, { screen: "join_game" }>) {
-  return (
-    <>
-      <ButtonGroup size="large" orientation="vertical">
-        <Typography m={2} variant="body1">
-          {`Joing game with ID`}
-          <br />
-          {`${props.gameId}`}
-        </Typography>
-        <Button
-          size="large"
-          variant="contained"
-          sx={{
-            m: 1,
-          }}
-          onClick={() => props.joinGame(props.socket, props.gameId)}
-        >
-          Join Game
-        </Button>
-      </ButtonGroup>
-    </>
-  );
-}
-
-function JoinGameWait(
-  props: Extract<GameScreen, { screen: "join_game_wait" }>
-) {
-  const allPlayersIn =
-    props.playersCount &&
-    props.playersCount.playersIn === props.playersCount.totalPlayers
-      ? true
-      : false;
-
-  return (
-    <>
-      {!allPlayersIn && (
-        <>
-          <Typography m={2} variant="body1">
-            Waiting for players to join.
-          </Typography>
-          <Typography m={2} variant="body1">
-            {`${props.playersCount?.playersIn ?? 0} of ${
-              props.playersCount?.totalPlayers ?? 0
-            }`}
-          </Typography>
-        </>
-      )}
-      {allPlayersIn && (
-        <>
-          <Typography m={2} variant="body1">
-            All players in, waiting for game to start.
-          </Typography>
-        </>
-      )}
-    </>
-  );
-}
-
-function Game(props: Extract<GameScreen, { screen: "game" }>) {
-  const timeRef = useRef<number>(new Date().getTime());
-  const [showClick, setShowClick] = useState<boolean>(true);
-  const { wins, socket, gameId, gameIsOver, clicker } = props;
-
-  useEffect(() => {
-    resetTimer(timeRef);
-    setShowClick(true);
-  }, [clicker]);
-
-  return (
-    <>
-      <Container
+      <Box
+        textAlign="center"
         sx={{
-          height: "100vh",
-          textAlign: "left",
-          paddingTop: 0,
-          backgroundImage: `url(${forest})`,
+          borderRadius: 1,
+          maxWidth: "md",
+          justifyContent: "center",
         }}
-        maxWidth="md"
       >
-        {!gameIsOver && (
-          <Typography
-            color={"white"}
-            variant="body1"
-          >{`Score: ${wins}`}</Typography>
-        )}
-
-        {showClick && !gameIsOver && (
-          <Mosquito
-            select={() => {
-              const action: ClientEvent = {
-                action: ClientAction.Click,
-                payload: { gameId, time: getTimeDiff(timeRef) },
-              };
-              socket.emit(socket.id, action);
-              setShowClick(false);
-            }}
-            x={clicker.x}
-            y={clicker.y}
-          />
-        )}
-        {gameIsOver && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            minHeight="80vh"
-            sx={
-              {
-                // borderRadius: 1,
-                // backgroundColor: "red",
-              }
-            }
-          >
-            <Box
-              display="flex"
-              flexDirection={"column"}
-              minHeight="20vh"
-              minWidth="80%"
-              maxWidth="md"
-              justifyContent="center"
-              alignItems="center"
-              textAlign={"center"}
-              sx={{
-                borderRadius: 1,
-                backgroundColor: "primary.light",
-              }}
-            >
-              <Typography color={"white"} variant="body1">
-                Game is over.
-                <br />
-                {`Your score is ${wins}`}
-              </Typography>
-              <Button
-                size="large"
-                variant="contained"
-                sx={{
-                  m: 1,
-                }}
-                onClick={() => {
-                  // Send event and reave the game.
-                }}
-              >
-                Ok cool
-              </Button>
-            </Box>
-          </Box>
-        )}
-      </Container>
-    </>
+        {screen}
+      </Box>
+    </Container>
   );
 }
 

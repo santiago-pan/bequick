@@ -1,5 +1,8 @@
 import { Socket } from "socket.io-client";
 
+export const DEFAULT_NUM_PLAYERS = "2";
+export const DEFAULT_NUM_ROUNDS = "10";
+
 export type ClickerPosition = {
   x: number;
   y: number;
@@ -7,7 +10,7 @@ export type ClickerPosition = {
 
 export type GameScreen =
   | {
-      screen: "new_game";
+      screen: "start_screen";
       newGame: () => void;
     }
   | {
@@ -26,11 +29,6 @@ export type GameScreen =
       playersCount: PlayersCount | null;
       socket: Socket;
       startGame: (socket: Socket, gameId: string) => void;
-    }
-  | {
-      screen: "new_game_start";
-      gameId: string;
-      playerId: string;
     }
   | {
       screen: "join_game";
@@ -54,9 +52,12 @@ export type GameScreen =
       clicker: ClickerPosition;
     };
 
-export type ScreenType = GameScreen["screen"];
 
 export type PlayersCount = {
   totalPlayers: number;
   playersIn: number;
 };
+
+export type ScreenType = Pick<GameScreen, "screen">;
+export type ScreenNames = ScreenType["screen"];
+export type ExtractScreen<T, U extends ScreenNames> = Extract<T, { screen: U }>;
