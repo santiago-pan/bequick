@@ -23,17 +23,16 @@ The infrastructure uses the following AWS services:
 ### JS client bundle
 
 AWS S3 bucket
+Cloudfront distribution
+Route 53
 
 ### NodeJS server
 
 AWS EC2 instance using Elastic Beanstalk
+Cloudfront distribution
+Route 53
 
 ## TODO
 
 - If a URL has id, chek with the server that the game is not finished or ongoing
 - If the game is finished or ongoing redirect to some error page or to starting page
-
-## DONE
-- Allow multiple and independent games: getSockets([ids])
-- Stype the Game screen
-- Rename 'gameid' by just 'id'
