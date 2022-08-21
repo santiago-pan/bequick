@@ -6,8 +6,8 @@ export default function Smoke(props: { x: number; y: number }) {
       alt="item-clicked"
       style={{
         position: "relative",
-        top: `${props.x}%`,
-        left: `${props.y}%`,
+        top: `${props.y}%`,
+        left: `${props.x}%`,
         marginLeft: "-27.5px",
         marginTop: "-25px",
         height: 50,

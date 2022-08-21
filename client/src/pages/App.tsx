@@ -12,7 +12,6 @@ import {
   ServerEvent,
 } from "../types";
 
-import "./App.css";
 import {
   DEFAULT_NUM_PLAYERS,
   DEFAULT_NUM_ROUNDS,

@@ -11,10 +11,10 @@ export default function Mosquito(props: {
       onClick={() => props.select()}
       style={{
         position: "relative",
-        top: `${props.x}%`,
-        left: `${props.y}%`,
-        marginLeft: '-25px',
-        marginTop: '-25px',
+        top: `${props.y}%`,
+        left: `${props.x}%`,
+        marginLeft: "-25px",
+        marginTop: "-25px",
         height: 50,
       }}
       src={mosquito}
