@@ -1,7 +1,9 @@
 import { Button, ButtonGroup, Typography } from "@mui/material";
-import { ExtractScreen, GameScreen } from "../AppTypes";
+import { ExtractScreen, GameScreen, SCREEN_NAME } from "../AppTypes";
 
-export function JoinGame(props: ExtractScreen<GameScreen, "join_game">) {
+export function JoinGame(
+  props: ExtractScreen<GameScreen, SCREEN_NAME.JOIN_GAME>
+) {
   return (
     <>
       <ButtonGroup size="large" orientation="vertical">
@@ -16,7 +18,7 @@ export function JoinGame(props: ExtractScreen<GameScreen, "join_game">) {
           sx={{
             m: 1,
           }}
-          onClick={() => props.joinGame(props.socket, props.gameId)}
+          onClick={() => props.joinGame(props.gameId)}
         >
           Join Game
         </Button>
@@ -26,7 +28,7 @@ export function JoinGame(props: ExtractScreen<GameScreen, "join_game">) {
 }
 
 export function JoinGameWait(
-  props: ExtractScreen<GameScreen, "join_game_wait">
+  props: ExtractScreen<GameScreen, SCREEN_NAME.JOIN_GAME_WAIT>
 ) {
   const allPlayersIn =
     props.playersCount &&

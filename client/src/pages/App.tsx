@@ -1,5 +1,5 @@
 import { Box, Container } from "@mui/material";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useReducer } from "react";
 import { useLocation } from "react-router-dom";
 import { Socket } from "socket.io-client";
 import { SocketContext } from "../context/SocketProvider";
@@ -14,11 +14,12 @@ import {
 
 import "./App.css";
 import {
-  ClickerPosition,
   DEFAULT_NUM_PLAYERS,
   DEFAULT_NUM_ROUNDS,
-  GameScreen,
-  PlayersCount,
+  GameAction,
+  GameState,
+  GAME_ACTION,
+  SCREEN_NAME,
 } from "./AppTypes";
 import Game from "./screens/Game";
 import { JoinGame, JoinGameWait } from "./screens/JoinGame";
@@ -42,12 +43,7 @@ function createGame(
   socket.emit(socket.id, action);
 }
 
-function joinGame(socket: Socket, gameId: string | null) {
-  if (!gameId) {
-    alert("No game id provided");
-    return;
-  }
-
+function joinGame(socket: Socket, gameId: string) {
   const action: ClientEvent = {
     action: ClientAction.JoinGame,
     payload: {
@@ -67,66 +63,248 @@ function startGame(socket: Socket, gameId: string) {
   socket.emit(socket.id, action);
 }
 
+function gameItemClick(socket: Socket, gameId: string, time: number) {
+  const action: ClientEvent = {
+    action: ClientAction.Click,
+    payload: { gameId, time },
+  };
+  socket.emit(socket.id, action);
+}
+
+function reducer(state: GameState, action: GameAction): GameState {
+  switch (action.type) {
+    case GAME_ACTION.START_SCREEN:
+      return {
+        ...state,
+        screen: {
+          screen: SCREEN_NAME.START_SCREEN,
+          newGame: action.payload.newGame,
+        },
+      };
+    case GAME_ACTION.NEW_GAME_CREATE:
+      return {
+        ...state,
+        screen: {
+          screen: SCREEN_NAME.NEW_GAME_CREATE,
+          createGame: action.payload.createGame,
+        },
+      };
+    case GAME_ACTION.NEW_GAME_SHARE:
+      return {
+        ...state,
+        screen: {
+          screen: SCREEN_NAME.NEW_GAME_SHARE,
+          gameId: action.payload.gameId,
+          playerId: action.payload.playerId,
+          playersCount: state.playersCount,
+          startGame: action.payload.startGame,
+        },
+      };
+    case GAME_ACTION.PLAYER_IN:
+      if (state.screen?.screen === SCREEN_NAME.NEW_GAME_SHARE) {
+        const newPlayersCount = {
+          playersIn: action.payload.playersIn,
+          totalPlayers: action.payload.totalPlayers,
+        };
+        return {
+          ...state,
+          screen: {
+            ...state.screen,
+            playersCount: newPlayersCount,
+          },
+          playersCount: newPlayersCount,
+        };
+      }
+      return state;
+    case GAME_ACTION.JOIN_GAME:
+      return {
+        ...state,
+        screen: {
+          screen: SCREEN_NAME.JOIN_GAME,
+          gameId: action.payload.gameId,
+          joinGame: action.payload.joinGame,
+        },
+      };
+    case GAME_ACTION.JOIN_GAME_WAIT:
+      return {
+        ...state,
+        playersCount: action.payload.playersCount,
+        screen: {
+          screen: SCREEN_NAME.JOIN_GAME_WAIT,
+          gameId: action.payload.gameId,
+          playerId: action.payload.playerId,
+          playersCount: action.payload.playersCount,
+        },
+      };
+    case GAME_ACTION.GAME:
+      return {
+        ...state,
+        screen: {
+          screen: SCREEN_NAME.GAME,
+          gameId: action.payload.gameId,
+          playerId: action.payload.playerId,
+          wins: action.payload.wins,
+          gameIsOver: action.payload.gameIsOver,
+          clicker: action.payload.clicker,
+          itemClick: action.payload.itemClick,
+        },
+      };
+    case GAME_ACTION.NEW_CLICKER:
+      if (state.screen?.screen === "game") {
+        return {
+          ...state,
+          clicker: action.payload.clicker,
+          screen: {
+            ...state.screen,
+            clicker: action.payload.clicker,
+          },
+        };
+      }
+      return state;
+    case GAME_ACTION.UPDATE_WINS:
+      if (state.screen?.screen === "game") {
+        return {
+          ...state,
+          wins: state.wins + 1,
+          screen: {
+            ...state.screen,
+            wins: state.wins + 1,
+          },
+        };
+      }
+      return state;
+    case GAME_ACTION.GAME_OVER:
+      if (state.screen?.screen === "game") {
+        return {
+          ...state,
+          gameIsOver: true,
+          screen: {
+            ...state.screen,
+            gameIsOver: true,
+          },
+        };
+      }
+      return state;
+    default:
+      return state;
+  }
+}
+
+const initialState: GameState = {
+  screen: null,
+  gameId: null,
+  clicker: null,
+  gameIsOver: false,
+  wins: 0,
+  playersCount: null,
+};
+
 function App() {
   const queryGameId = useQuery().get("id");
-  const [gameId, setGameId] = useState<string | null>(queryGameId);
-  const [clicker, setClicker] = useState<ClickerPosition | null>(null);
-  const [gameIsOver, setGameIsOver] = useState<boolean>(false);
-  const [wins, setWins] = useState<number>(0);
-  const [playersCount, setPlayersCount] = useState<PlayersCount | null>(null);
 
   const { socket } = useContext(SocketContext);
 
-  const [gameScreen, setGameScreen] = useState<GameScreen | null>(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  function newGame(socket: Socket) {
+    dispatch({
+      type: GAME_ACTION.NEW_GAME_CREATE,
+      payload: {
+        createGame: (numPlayers, numRounds) =>
+          createGame(socket, numPlayers, numRounds),
+      },
+    });
+  }
+
+  // Initial game screen (start or join)
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+    if (state.gameId === null && state.screen === null) {
+      dispatch({
+        type: GAME_ACTION.START_SCREEN,
+        payload: {
+          newGame: () => newGame(socket),
+        },
+      });
+    }
+    if (state.gameId === null && state.screen === null && queryGameId) {
+      dispatch({
+        type: GAME_ACTION.JOIN_GAME,
+        payload: {
+          gameId: queryGameId,
+          joinGame: (gameId) => joinGame(socket, gameId),
+        },
+      });
+    }
+  }, [state.gameId, state.screen, queryGameId, socket]);
 
   // Socket messages
   useEffect(() => {
     if (socket) {
       socket.on(MSG_TYPE.EMIT_ALL, (arg: ServerEvent) => {
         if (arg.action === ServerAction.GameIsOver) {
-          setGameIsOver(true);
+          dispatch({ type: GAME_ACTION.GAME_OVER });
         }
         if (arg.action === ServerAction.PlayersIn) {
-          console.log("player in: ", arg);
-
-          setPlayersCount({
-            totalPlayers: arg.payload.totalPlayers,
-            playersIn: arg.payload.playersIn,
+          dispatch({
+            type: GAME_ACTION.PLAYER_IN,
+            payload: {
+              totalPlayers: arg.payload.totalPlayers,
+              playersIn: arg.payload.playersIn,
+            },
           });
         }
         if (arg.action === ServerAction.GameStartAck) {
-          setGameScreen({
-            screen: "game",
-            socket,
-            gameId: arg.payload.gameId,
-            playerId: socket.id,
-            gameIsOver: false,
-            wins: 0,
-            clicker: {
-              x: arg.payload.x,
-              y: arg.payload.y,
+          dispatch({
+            type: GAME_ACTION.GAME,
+            payload: {
+              gameId: arg.payload.gameId,
+              playerId: socket.id,
+              gameIsOver: false,
+              wins: 0,
+              clicker: { x: arg.payload.x, y: arg.payload.y },
+              itemClick: (gameId, time) => gameItemClick(socket, gameId, time),
             },
           });
         }
         if (arg.action === ServerAction.NewClicker) {
-          setClicker(arg.payload);
+          dispatch({
+            type: GAME_ACTION.NEW_CLICKER,
+            payload: {
+              clicker: { x: arg.payload.x, y: arg.payload.y },
+            },
+          });
         }
       });
       socket.on(MSG_TYPE.EMIT_ONE, (arg: ServerEvent) => {
         if (arg.action === ServerAction.NewGameAck) {
-          setGameId(arg.payload.gameId);
+          console.log(arg.payload.gameId);
+          dispatch({
+            type: GAME_ACTION.NEW_GAME_SHARE,
+            payload: {
+              gameId: arg.payload.gameId,
+              playerId: socket.id,
+              startGame: (gameId: string) => startGame(socket, gameId),
+            },
+          });
         }
         if (arg.action === ServerAction.RoundWinner) {
-          setWins((w) => w + 1);
+          dispatch({
+            type: GAME_ACTION.UPDATE_WINS,
+          });
         }
         if (arg.action === ServerAction.JoinGameAck) {
-          setGameScreen({
-            screen: "join_game_wait",
-            gameId: arg.payload.gameId,
-            playerId: socket.id,
-            playersCount: {
-              totalPlayers: arg.payload.totalPlayers,
-              playersIn: arg.payload.playersIn,
+          dispatch({
+            type: GAME_ACTION.JOIN_GAME_WAIT,
+            payload: {
+              gameId: arg.payload.gameId,
+              playerId: socket.id,
+              playersCount: {
+                totalPlayers: arg.payload.totalPlayers,
+                playersIn: arg.payload.playersIn,
+              },
             },
           });
         }
@@ -134,124 +312,21 @@ function App() {
     }
   }, [socket]);
 
-  // Screen changes
-  useEffect(() => {
-    if (!socket) {
-      return;
-    }
-    if (gameId === null && gameScreen === null) {
-      setGameScreen({
-        screen: "start_screen",
-        newGame: () => {
-          if (socket) {
-            setGameScreen({
-              screen: "new_game_create",
-              socket,
-              createGame,
-            });
-          }
-        },
-      });
-    }
-    if (gameId && gameScreen && gameScreen.screen === "new_game_create") {
-      setGameScreen({
-        screen: "new_game_share",
-        gameId,
-        playerId: socket.id,
-        playersCount,
-        socket,
-        startGame,
-      });
-    }
-    // Update players in / total players counter
-    if (
-      gameId &&
-      gameScreen &&
-      gameScreen.screen === "new_game_share" &&
-      playersCount
-    ) {
-      if (
-        gameScreen.playersCount?.playersIn !== playersCount.playersIn ||
-        gameScreen.playersCount?.totalPlayers !== playersCount.totalPlayers
-      ) {
-        setGameScreen({
-          screen: "new_game_share",
-          gameId,
-          playerId: socket.id,
-          playersCount,
-          socket,
-          startGame,
-        });
-      }
-    }
-    if (gameId && gameScreen === null) {
-      setGameScreen({
-        screen: "join_game",
-        gameId,
-        socket,
-        joinGame,
-      });
-    }
-    if (
-      gameId &&
-      gameScreen &&
-      gameScreen.screen === "join_game_wait" &&
-      playersCount
-    ) {
-      if (
-        gameScreen.playersCount?.playersIn !== playersCount.playersIn ||
-        gameScreen.playersCount?.totalPlayers !== playersCount.totalPlayers
-      ) {
-        setGameScreen({
-          screen: "join_game_wait",
-          gameId,
-          playerId: socket.id,
-          playersCount,
-        });
-      }
-    }
-    if (gameId && gameScreen && gameScreen.screen === "start_screen") {
-      setGameScreen({
-        screen: "new_game_create",
-        socket,
-        createGame,
-      });
-    }
-    if (gameId && gameScreen && gameScreen.screen === "game" && clicker) {
-      if (
-        gameScreen.clicker.x !== clicker.x ||
-        gameScreen.clicker.y !== clicker.y ||
-        gameScreen.wins !== wins ||
-        gameScreen.gameIsOver !== gameIsOver
-      ) {
-        setGameScreen({
-          screen: "game",
-          socket,
-          gameId,
-          playerId: socket.id,
-          gameIsOver,
-          wins,
-          clicker,
-        });
-      }
-    }
-  }, [gameId, gameScreen, socket, playersCount, clicker, wins, gameIsOver]);
-
   if (!socket) {
     return <div>Waiting for socket connection...</div>;
   }
 
-  const screen = gameScreen && ScreenSelector(gameScreen);
+  const screen = ScreenSelector(state);
 
   if (!screen) {
     return <></>;
   }
 
-  if (gameScreen.screen === "game") {
+  if (state.screen?.screen === SCREEN_NAME.GAME) {
     return screen;
+  } else {
+    return <>{AppContainer(screen)}</>;
   }
-
-  return <>{AppContainer(screen)}</>;
 }
 
 function useQuery() {
@@ -259,19 +334,23 @@ function useQuery() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-function ScreenSelector(gameScreen: GameScreen) {
+function ScreenSelector(state: GameState) {
+  const gameScreen = state.screen;
+  if (!gameScreen) {
+    return null;
+  }
   switch (gameScreen.screen) {
-    case "start_screen":
+    case SCREEN_NAME.START_SCREEN:
       return <StartScreen {...gameScreen} />;
-    case "new_game_create":
+    case SCREEN_NAME.NEW_GAME_CREATE:
       return <NewGameCreate {...gameScreen} />;
-    case "new_game_share":
+    case SCREEN_NAME.NEW_GAME_SHARE:
       return <NewGameShare {...gameScreen} />;
-    case "join_game":
+    case SCREEN_NAME.JOIN_GAME:
       return <JoinGame {...gameScreen} />;
-    case "join_game_wait":
+    case SCREEN_NAME.JOIN_GAME_WAIT:
       return <JoinGameWait {...gameScreen} />;
-    case "game":
+    case SCREEN_NAME.GAME:
       return <Game {...gameScreen} />;
     default:
       assertNever(gameScreen);

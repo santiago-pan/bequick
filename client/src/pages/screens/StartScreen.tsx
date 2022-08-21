@@ -1,8 +1,8 @@
 import { Button, ButtonGroup } from "@mui/material";
-import { ExtractScreen, GameScreen } from "../AppTypes";
+import { ExtractScreen, GameScreen, SCREEN_NAME } from "../AppTypes";
 
 export default function StartScreen(
-  props: ExtractScreen<GameScreen, "start_screen">
+  props: ExtractScreen<GameScreen, SCREEN_NAME.START_SCREEN>
 ) {
   return (
     <>

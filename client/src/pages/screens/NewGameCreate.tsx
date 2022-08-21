@@ -5,9 +5,10 @@ import {
   DEFAULT_NUM_ROUNDS,
   ExtractScreen,
   GameScreen,
+  SCREEN_NAME,
 } from "../AppTypes";
 
-type Props = ExtractScreen<GameScreen, "new_game_create">;
+type Props = ExtractScreen<GameScreen, SCREEN_NAME.NEW_GAME_CREATE>;
 
 export default function NewGameCreate(props: Props) {
   const [players, setPlayers] = useState<string>(DEFAULT_NUM_PLAYERS);
@@ -43,7 +44,7 @@ export default function NewGameCreate(props: Props) {
           sx={{
             m: 1,
           }}
-          onClick={() => props.createGame(props.socket, players, rounds)}
+          onClick={() => props.createGame(players, rounds)}
         >
           Create Game
         </Button>
