@@ -27,50 +27,6 @@ import NewGameCreate from "./screens/NewGameCreate";
 import NewGameShare from "./screens/NewGameShare";
 import StartScreen from "./screens/StartScreen";
 
-function createGame(
-  socket: Socket,
-  numPlayers: string = DEFAULT_NUM_PLAYERS,
-  numRounds: string = DEFAULT_NUM_ROUNDS
-) {
-  const action: ClientEvent = {
-    action: ClientAction.NewGame,
-    payload: {
-      numPlayers: parseInt(numPlayers),
-      numRounds: parseInt(numRounds),
-      playerId: socket.id,
-    },
-  };
-  socket.emit(socket.id, action);
-}
-
-function joinGame(socket: Socket, gameId: string) {
-  const action: ClientEvent = {
-    action: ClientAction.JoinGame,
-    payload: {
-      gameId,
-    },
-  };
-  socket.emit(socket.id, action);
-}
-
-function startGame(socket: Socket, gameId: string) {
-  const action: ClientEvent = {
-    action: ClientAction.GameStart,
-    payload: {
-      gameId,
-    },
-  };
-  socket.emit(socket.id, action);
-}
-
-function gameItemClick(socket: Socket, gameId: string, time: number) {
-  const action: ClientEvent = {
-    action: ClientAction.Click,
-    payload: { gameId, time },
-  };
-  socket.emit(socket.id, action);
-}
-
 function reducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case GAME_ACTION.START_SCREEN:
@@ -190,6 +146,50 @@ function reducer(state: GameState, action: GameAction): GameState {
   }
 }
 
+function createGame(
+  socket: Socket,
+  numPlayers: string = DEFAULT_NUM_PLAYERS,
+  numRounds: string = DEFAULT_NUM_ROUNDS
+) {
+  const action: ClientEvent = {
+    action: ClientAction.NewGame,
+    payload: {
+      numPlayers: parseInt(numPlayers),
+      numRounds: parseInt(numRounds),
+      playerId: socket.id,
+    },
+  };
+  socket.emit(socket.id, action);
+}
+
+function joinGame(socket: Socket, gameId: string) {
+  const action: ClientEvent = {
+    action: ClientAction.JoinGame,
+    payload: {
+      gameId,
+    },
+  };
+  socket.emit(socket.id, action);
+}
+
+function startGame(socket: Socket, gameId: string) {
+  const action: ClientEvent = {
+    action: ClientAction.GameStart,
+    payload: {
+      gameId,
+    },
+  };
+  socket.emit(socket.id, action);
+}
+
+function gameItemClick(socket: Socket, gameId: string, time: number) {
+  const action: ClientEvent = {
+    action: ClientAction.Click,
+    payload: { gameId, time },
+  };
+  socket.emit(socket.id, action);
+}
+
 const initialState: GameState = {
   screen: null,
   gameId: null,
@@ -200,11 +200,10 @@ const initialState: GameState = {
 };
 
 function App() {
-  const queryGameId = useQuery().get("id");
-
-  const { socket } = useContext(SocketContext);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { socket } = useContext(SocketContext);
+  const queryGameId = useQuery().get("id");
 
   function newGame(socket: Socket) {
     dispatch({
