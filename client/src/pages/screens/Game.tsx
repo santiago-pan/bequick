@@ -1,9 +1,8 @@
 import { Container, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { ClientAction, ClientEvent } from "../../types";
-import { ExtractScreen, GameScreen } from "../AppTypes";
-import Ko from "../ui/Smoke";
+import { ExtractScreen, GameScreen, SCREEN_NAME } from "../AppTypes";
 import Mosquito from "../ui/Mosquito";
+import Ko from "../ui/Smoke";
 import forest from "./../../assets/images/forest.jpg";
 import GameOver from "./GameOver";
 
@@ -17,20 +16,16 @@ function getTimeDiff(timeRef: React.MutableRefObject<number>) {
   return d.getTime() - timeRef.current;
 }
 
-type GameProps = ExtractScreen<GameScreen, "game">;
+type GameProps = ExtractScreen<GameScreen, SCREEN_NAME.GAME>;
 
 export default function Game(props: GameProps) {
   const timeRef = useRef<number>(new Date().getTime());
   const [showClick, setShowClick] = useState<boolean>(true);
-  const { wins, socket, gameId, gameIsOver, clicker } = props;
+  const { wins, gameId, gameIsOver, clicker } = props;
 
   function handleItemClick() {
     setShowClick(false);
-    const action: ClientEvent = {
-      action: ClientAction.Click,
-      payload: { gameId, time: getTimeDiff(timeRef) },
-    };
-    socket.emit(socket.id, action);
+    props.itemClick(gameId, getTimeDiff(timeRef));
   }
 
   useEffect(() => {

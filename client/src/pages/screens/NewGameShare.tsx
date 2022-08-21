@@ -8,12 +8,12 @@ import {
   LineIcon,
   LineShareButton,
   WhatsappIcon,
-  WhatsappShareButton,
+  WhatsappShareButton
 } from "react-share";
-import { ExtractScreen, GameScreen } from "../AppTypes";
+import { ExtractScreen, GameScreen, SCREEN_NAME } from "../AppTypes";
 
 export default function NewGameShare(
-  props: ExtractScreen<GameScreen, "new_game_share">
+  props: ExtractScreen<GameScreen, SCREEN_NAME.NEW_GAME_SHARE>
 ) {
   const shareUrl = `https://bequick.pancarneiro.com/?id=${props.gameId}`;
   const title = "";
@@ -40,11 +40,7 @@ export default function NewGameShare(
         <FacebookShareButton url={shareUrl} quote={title}>
           <FacebookIcon size={48} />
         </FacebookShareButton>
-        <EmailShareButton
-          url={shareUrl}
-          subject={"Quick click game"}
-          body={""}
-        >
+        <EmailShareButton url={shareUrl} subject={"Quick click game"} body={""}>
           <EmailIcon size={48} />
         </EmailShareButton>
       </Box>
@@ -53,11 +49,13 @@ export default function NewGameShare(
           <Typography m={2} variant="body1">
             Waiting for players to join.
           </Typography>
-          <Typography m={2} variant="body1">
-            {`${props.playersCount?.playersIn ?? 0} of ${
-              props.playersCount?.totalPlayers ?? 0
-            }`}
-          </Typography>
+          {props.playersCount && props.playersCount.totalPlayers > 0 && (
+            <Typography m={2} variant="body1">
+              {`${props.playersCount?.playersIn ?? 0} of ${
+                props.playersCount?.totalPlayers ?? 0
+              }`}
+            </Typography>
+          )}
         </>
       )}
       {allPlayersIn && (
@@ -71,7 +69,7 @@ export default function NewGameShare(
             sx={{
               m: 1,
             }}
-            onClick={() => props.startGame(props.socket, props.gameId)}
+            onClick={() => props.startGame(props.gameId)}
           >
             Start Game
           </Button>
