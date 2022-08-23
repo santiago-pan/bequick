@@ -1,4 +1,4 @@
-import { getGames, newGame } from '../GameManager';
+import { Game, getGame, getGames, newGame } from '../GameManager';
 
 describe('Thest for Game Manager', () => {
   it('create a new defaul game', () => {
@@ -38,6 +38,33 @@ describe('Thest for Game Manager', () => {
     expect(game.getPlayers().get('player1')?.playerId).toBe('player1');
     expect(game.getPlayers().get('player1')?.score).toBe(0);
     expect(game.getRounds().length).toBe(0);
+  });
+
+  it('should test getting a non existing game', () => {
+    try {
+      const game = getGame(getGames(), 'non-game');
+    } catch (err) {
+      expect(err).toBeTruthy();
+    }
+  });
+
+  it('should test that no more players can join when all in', () => {
+    const gameId = 'player1';
+    const game = newGame(gameId, 2, 1);
+    game.addPlayer('player2', 'join');
+    expect(game.allPlayersIn()).toBeTruthy();
+    game.addPlayer('player3', 'join');
+    expect(game.players.size).toBe(2);
+  });
+
+  it('should test that a non joined player can not roll in a game', () => {
+    const gameId = 'player1';
+    const game = newGame(gameId, 2, 1);
+    game.addPlayer('player2', 'join');
+    expect(game.allPlayersIn()).toBeTruthy();
+    game.addRound();
+    game.updateRound('player3', 100);
+    expect(game.getRound()?.rolls.size).toBe(0);
   });
 
   it('should test that same player can not play more than one roll per round', () => {
@@ -164,6 +191,41 @@ describe('Thest for Game Manager', () => {
       expect(game2.getRound()?.rolls.get('player2Game2')?.time).toBe(102);
       expect(game2.getRound()?.rolls.get('player3Game2')?.time).toBe(103);
       expect(game2.roundWinner()).toEqual('player1Game2');
+    }
+  });
+
+  it('should perform a stress test', () => {
+    const NUM_GAMES = 1000;
+    const NUM_PLAYERS = 100;
+    const NUM_ROUNDS = 10;
+
+    const games: Array<Game> = [];
+
+    for (let gameIndex = 0; gameIndex < NUM_GAMES; gameIndex++) {
+      const allgames = getGames();
+      const game = new Game(gameIndex.toString(), NUM_PLAYERS, NUM_ROUNDS);
+      allgames.set(game.id, game);
+      games.push(game);
+    }
+    for (const game of games) {
+      for (let playerIndex = 0; playerIndex < NUM_PLAYERS; playerIndex++) {
+        game.addPlayer(`${game.id}-${playerIndex.toString()}`, 'join');
+      }
+    }
+    for (const game of games) {
+      for (let roundIndex = 0; roundIndex < NUM_ROUNDS; roundIndex++) {
+        game.addRound();
+        for (let playerIndex = 0; playerIndex < NUM_PLAYERS; playerIndex++) {
+          const playerId = `${game.id}-${playerIndex.toString()}`;
+          game.updateRound(playerId, 200 - playerIndex);
+        }
+      }
+    }
+
+    for (const game of games) {
+      expect(game.roundIsOver()).toBeTruthy();
+      expect(game.gameIsOver()).toBeTruthy();
+      expect(game.roundWinner()).toBe(`${game.id}-${NUM_PLAYERS - 1}`);
     }
   });
 });

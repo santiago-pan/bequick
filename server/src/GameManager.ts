@@ -65,11 +65,13 @@ export class Game {
   }
   // Add a new player to this game
   addPlayer(playerId: SocketID, role: 'host' | 'join') {
-    this.players.set(playerId, {
-      playerId,
-      role,
-      score: 0,
-    });
+    if (!this.allPlayersIn() && !this.gameIsOver()) {
+      this.players.set(playerId, {
+        playerId,
+        role,
+        score: 0,
+      });
+    }
   }
   allPlayersIn() {
     return this.totalPlayers === this.players.size;
@@ -87,12 +89,15 @@ export class Game {
   // Updates round for a player
   updateRound(playerId: SocketID, time: number) {
     const currentRound = this.getRound();
-    if (currentRound) {
+    const currentPlayer = this.players.get(playerId);
+    if (currentRound && currentPlayer) {
       if (!currentRound.rolls.get(playerId)) {
         currentRound.rolls.set(playerId, { time });
       }
     } else {
-      console.log(`Warning: No current round for ${playerId}`);
+      console.log(
+        `Warning: No current round or player in game for ${playerId}`,
+      );
     }
   }
   roundIsOver() {
@@ -160,13 +165,16 @@ export function getGames() {
 
 export function newGame(
   hostSockedId: SocketID,
-  totalPlayers?: number,
-  totalRounds?: number,
+  totalPlayers: number = 2,
+  totalRounds: number = 10,
 ) {
-  const game = createGame(getGames(), hostSockedId, totalPlayers, totalRounds);
+  const games = getGames();
+  const game = new Game(hostSockedId, totalPlayers, totalRounds);
+  games.set(game.id, game);
+  game.addPlayer(hostSockedId, 'host');
   sendNewGameId(hostSockedId, game.id);
   sendPlayersIn(game.getPlayersIds(), game.totalPlayers, game.getPlayersIn());
-  game.log();
+  // game.log();
   return game;
 }
 
@@ -175,7 +183,7 @@ export function joinGame(playerSocketId: SocketID, gameId: GameID) {
   const game = getGame(games, gameId);
   game.addPlayer(playerSocketId, 'join');
   game.addRound();
-  game.log();
+
   // Only to sender
   sendJoinAck(playerSocketId, gameId, game.totalPlayers, game.getPlayersIn());
   // To all but sender
@@ -236,7 +244,6 @@ export function createGame(
   totalRounds = 10,
 ): Game {
   const newGame = new Game(hostSockedId, totalPlayers, totalRounds);
-  newGame.addPlayer(hostSockedId, 'host');
   games.set(newGame.id, newGame);
   return newGame;
 }
@@ -250,7 +257,7 @@ export function getRandomCoord(): Coords {
   };
 }
 
-function getGame(games: Map<GameID, Game> = new Map(), gameId: GameID) {
+export function getGame(games: Map<GameID, Game> = new Map(), gameId: GameID) {
   const game = games.get(gameId);
   if (!game) {
     throw Error(`Game not found ${gameId}`);

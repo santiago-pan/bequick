@@ -1,6 +1,14 @@
 import { Socket } from 'socket.io';
 import { assertNever } from './Assert';
-import { Coords, GameID, gameStart, getRandomCoord, joinGame, newClickAction, newGame } from './GameManager';
+import {
+  Coords,
+  GameID,
+  gameStart,
+  getRandomCoord,
+  joinGame,
+  newClickAction,
+  newGame,
+} from './GameManager';
 import {
   ClientAction,
   ClientEvent,
@@ -49,7 +57,7 @@ export function getGameSockets(ids: Array<SocketID>) {
 }
 
 export function getSockets() {
-  return __sockets
+  return __sockets;
 }
 
 export function getSocket(id: SocketID) {
@@ -59,32 +67,35 @@ export function getSocket(id: SocketID) {
 export function addSocket(socket: TSocket) {
   __sockets.set(socket.id, socket);
 
-  socket.on(socket.id, (arg) => {
-    console.log(`Server> Got: ${JSON.stringify(arg)}`);
+  try {
+    socket.on(socket.id, (arg) => {
+      console.log(`Server> Got: ${JSON.stringify(arg)}`);
 
-    switch (arg.action) {
-      case ClientAction.NewGame:
-        newGame(
-          arg.payload.playerId,
-          arg.payload.numPlayers,
-          arg.payload.numRounds,
-        );
-        return;
-      case ClientAction.JoinGame:
-        joinGame(socket.id, arg.payload.gameId);
-        return;
-      case ClientAction.GameStart:
-        gameStart(arg.payload.gameId);
-        return;
-      case ClientAction.Click:
-        newClickAction(socket.id, arg);
-        return;
-      default:
-        return assertNever(arg);
-    }
-  });
-
-  console.log(`New socket ${socket.id}. Total: ${__sockets.size}`);
+      switch (arg.action) {
+        case ClientAction.NewGame:
+          newGame(
+            arg.payload.playerId,
+            arg.payload.numPlayers,
+            arg.payload.numRounds,
+          );
+          return;
+        case ClientAction.JoinGame:
+          joinGame(socket.id, arg.payload.gameId);
+          return;
+        case ClientAction.GameStart:
+          gameStart(arg.payload.gameId);
+          return;
+        case ClientAction.Click:
+          newClickAction(socket.id, arg);
+          return;
+        default:
+          return assertNever(arg);
+      }
+    });
+    console.log(`New socket ${socket.id}. Total: ${__sockets.size}`);
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export function removeSocket(socketId: SocketID) {
