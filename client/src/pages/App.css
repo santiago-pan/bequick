@@ -1,29 +1,45 @@
-/* .App {
+.MuiContainer-root.app-container {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url("./../assets/images/background.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.MuiContainer-root.app-game-container {
+  height: 100vh;
+  text-align: left;
+  background-image: url("./../assets/images/background.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.MuiBox-root.app-box {
+  background-color: hsl(var(--primary-light-hsl), 0.9);
+  box-shadow: 0 0 15px 0 hsl(var(--primary-dark-hsl), 0.7);
+  padding: 20px 15px;
+  border-radius: 4px;
+  justify-content: center;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.MuiBox-root.app-game-over-box-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.MuiBox-root.app-game-over-box {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  background-color: hsl(var(--primary-light-hsl), 0.9);
+  box-shadow: 0 0 15px 0 hsl(var(--primary-dark-hsl), 0.7);
+  padding: 20px 15px;
+  border-radius: 4px;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  text-align: center;
 }
-
-.App-link {
-  color: #61dafb;
-} */

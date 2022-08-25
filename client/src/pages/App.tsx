@@ -11,8 +11,8 @@ import {
   ServerAction,
   ServerEvent,
 } from "../types";
-
 import "./App.css";
+
 import {
   DEFAULT_NUM_PLAYERS,
   DEFAULT_NUM_ROUNDS,
@@ -26,50 +26,6 @@ import { JoinGame, JoinGameWait } from "./screens/JoinGame";
 import NewGameCreate from "./screens/NewGameCreate";
 import NewGameShare from "./screens/NewGameShare";
 import StartScreen from "./screens/StartScreen";
-
-function createGame(
-  socket: Socket,
-  numPlayers: string = DEFAULT_NUM_PLAYERS,
-  numRounds: string = DEFAULT_NUM_ROUNDS
-) {
-  const action: ClientEvent = {
-    action: ClientAction.NewGame,
-    payload: {
-      numPlayers: parseInt(numPlayers),
-      numRounds: parseInt(numRounds),
-      playerId: socket.id,
-    },
-  };
-  socket.emit(socket.id, action);
-}
-
-function joinGame(socket: Socket, gameId: string) {
-  const action: ClientEvent = {
-    action: ClientAction.JoinGame,
-    payload: {
-      gameId,
-    },
-  };
-  socket.emit(socket.id, action);
-}
-
-function startGame(socket: Socket, gameId: string) {
-  const action: ClientEvent = {
-    action: ClientAction.GameStart,
-    payload: {
-      gameId,
-    },
-  };
-  socket.emit(socket.id, action);
-}
-
-function gameItemClick(socket: Socket, gameId: string, time: number) {
-  const action: ClientEvent = {
-    action: ClientAction.Click,
-    payload: { gameId, time },
-  };
-  socket.emit(socket.id, action);
-}
 
 function reducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -190,6 +146,50 @@ function reducer(state: GameState, action: GameAction): GameState {
   }
 }
 
+function createGame(
+  socket: Socket,
+  numPlayers: string = DEFAULT_NUM_PLAYERS,
+  numRounds: string = DEFAULT_NUM_ROUNDS
+) {
+  const action: ClientEvent = {
+    action: ClientAction.NewGame,
+    payload: {
+      numPlayers: parseInt(numPlayers),
+      numRounds: parseInt(numRounds),
+      playerId: socket.id,
+    },
+  };
+  socket.emit(socket.id, action);
+}
+
+function joinGame(socket: Socket, gameId: string) {
+  const action: ClientEvent = {
+    action: ClientAction.JoinGame,
+    payload: {
+      gameId,
+    },
+  };
+  socket.emit(socket.id, action);
+}
+
+function startGame(socket: Socket, gameId: string) {
+  const action: ClientEvent = {
+    action: ClientAction.GameStart,
+    payload: {
+      gameId,
+    },
+  };
+  socket.emit(socket.id, action);
+}
+
+function gameItemClick(socket: Socket, gameId: string, time: number) {
+  const action: ClientEvent = {
+    action: ClientAction.Click,
+    payload: { gameId, time },
+  };
+  socket.emit(socket.id, action);
+}
+
 const initialState: GameState = {
   screen: null,
   gameId: null,
@@ -200,11 +200,9 @@ const initialState: GameState = {
 };
 
 function App() {
-  const queryGameId = useQuery().get("id");
-
-  const { socket } = useContext(SocketContext);
-
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { socket } = useContext(SocketContext);
+  const queryGameId = useQuery().get("id");
 
   function newGame(socket: Socket) {
     dispatch({
@@ -359,32 +357,8 @@ function ScreenSelector(state: GameState) {
 
 function AppContainer(screen: JSX.Element) {
   return (
-    <Container
-      sx={{
-        height: "100vh",
-        textAlign: "center",
-        paddingTop: 0,
-      }}
-      maxWidth="md"
-    >
-      <img
-        alt="logo"
-        src={`qc-logo.png`}
-        width={64}
-        height={64}
-        style={{ padding: "5vh" }}
-      />
-
-      <Box
-        textAlign="center"
-        sx={{
-          borderRadius: 1,
-          maxWidth: "md",
-          justifyContent: "center",
-        }}
-      >
-        {screen}
-      </Box>
+    <Container className="app-container" maxWidth="xs">
+      <Box className="app-box">{screen}</Box>
     </Container>
   );
 }

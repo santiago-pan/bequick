@@ -2,6 +2,7 @@ import "normalize.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import SocketProvider from "./context/SocketProvider";
+import "./index.css";
 import AppRoutes from "./pages/AppRoutes";
 import reportWebVitals from "./reportWebVitals";
 

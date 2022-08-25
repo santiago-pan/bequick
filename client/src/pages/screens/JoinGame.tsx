@@ -6,11 +6,12 @@ export function JoinGame(
 ) {
   return (
     <>
-      <ButtonGroup size="large" orientation="vertical">
+      <ButtonGroup orientation="vertical">
+        <Typography m={2} variant="h4">
+          BeQuick
+        </Typography>
         <Typography m={2} variant="body1">
-          {`Joing game with ID`}
-          <br />
-          {`${props.gameId}`}
+          Join a new game
         </Typography>
         <Button
           size="large"
@@ -20,7 +21,7 @@ export function JoinGame(
           }}
           onClick={() => props.joinGame(props.gameId)}
         >
-          Join Game
+          Join
         </Button>
       </ButtonGroup>
     </>
@@ -38,25 +39,33 @@ export function JoinGameWait(
 
   return (
     <>
-      {!allPlayersIn && (
-        <>
-          <Typography m={2} variant="body1">
-            Waiting for players to join.
-          </Typography>
-          <Typography m={2} variant="body1">
-            {`${props.playersCount?.playersIn ?? 0} of ${
-              props.playersCount?.totalPlayers ?? 0
-            }`}
-          </Typography>
-        </>
-      )}
-      {allPlayersIn && (
-        <>
-          <Typography m={2} variant="body1">
-            All players in, waiting for game to start.
-          </Typography>
-        </>
-      )}
+      <ButtonGroup orientation="vertical">
+        {!allPlayersIn && (
+          <>
+            <Typography m={2} variant="h4">
+              BeQuick
+            </Typography>
+            <Typography m={2} variant="body1">
+              Waiting for players to join
+            </Typography>
+            <Typography m={2} variant="body1">
+              {`${props.playersCount?.playersIn ?? 0} of ${
+                props.playersCount?.totalPlayers ?? 0
+              }`}
+            </Typography>
+          </>
+        )}
+        {allPlayersIn && (
+          <>
+            <Typography m={2} variant="h4">
+              BeQuick
+            </Typography>
+            <Typography m={2} variant="body1">
+              All players in, waiting for game to start
+            </Typography>
+          </>
+        )}
+      </ButtonGroup>
     </>
   );
 }

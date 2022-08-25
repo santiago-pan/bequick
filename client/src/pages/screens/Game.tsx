@@ -1,9 +1,8 @@
-import { Container, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { ExtractScreen, GameScreen, SCREEN_NAME } from "../AppTypes";
 import Mosquito from "../ui/Mosquito";
 import Ko from "../ui/Smoke";
-import forest from "./../../assets/images/forest.jpg";
 import GameOver from "./GameOver";
 
 function resetTimer(timeRef: React.MutableRefObject<number>) {
@@ -38,26 +37,26 @@ export default function Game(props: GameProps) {
 
   return (
     <>
-      <Container
-        sx={{
-          height: "100vh",
-          textAlign: "left",
-          paddingTop: 0,
-          backgroundImage: `url(${forest})`,
-        }}
-        maxWidth="md"
-      >
+      <Container className="app-game-container" maxWidth="xs">
         {!gameIsOver && (
           <Typography
             color={"white"}
             variant="body1"
           >{`Score ${wins}`}</Typography>
         )}
-        {showItem && (
-          <Mosquito select={handleItemClick} x={clicker.x} y={clicker.y} />
-        )}
-        {showItemKo && <Ko x={clicker.x} y={clicker.y} />}
-        {gameIsOver && <GameOver wins={wins} />}
+        <Box
+          sx={{
+            position: "relative",
+            height: "94vh",
+          }}
+          maxWidth="md"
+        >
+          {showItem && (
+            <Mosquito select={handleItemClick} x={clicker.x} y={clicker.y} />
+          )}
+          {showItemKo && <Ko x={clicker.x} y={clicker.y} />}
+          {gameIsOver && <GameOver wins={wins} />}
+        </Box>
       </Container>
     </>
   );

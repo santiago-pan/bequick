@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 type SocketContextType = {
@@ -19,9 +19,11 @@ function connect() {
 
 export default function SocketProvider(props: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const isConnecting = useRef(false);
 
   useEffect(() => {
-    if (socket === null) {
+    if (socket === null && isConnecting.current === false) {
+      isConnecting.current = true;
       setSocket(connect());
     }
   }, [socket]);
