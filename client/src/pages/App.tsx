@@ -11,6 +11,7 @@ import {
   ServerAction,
   ServerEvent,
 } from "../types";
+import "./App.css";
 
 import {
   DEFAULT_NUM_PLAYERS,
@@ -199,7 +200,6 @@ const initialState: GameState = {
 };
 
 function App() {
-
   const [state, dispatch] = useReducer(reducer, initialState);
   const { socket } = useContext(SocketContext);
   const queryGameId = useQuery().get("id");
@@ -357,32 +357,8 @@ function ScreenSelector(state: GameState) {
 
 function AppContainer(screen: JSX.Element) {
   return (
-    <Container
-      sx={{
-        height: "100vh",
-        textAlign: "center",
-        paddingTop: 0,
-      }}
-      maxWidth="md"
-    >
-      <img
-        alt="logo"
-        src={`qc-logo.png`}
-        width={64}
-        height={64}
-        style={{ padding: "5vh" }}
-      />
-
-      <Box
-        textAlign="center"
-        sx={{
-          borderRadius: 1,
-          maxWidth: "md",
-          justifyContent: "center",
-        }}
-      >
-        {screen}
-      </Box>
+    <Container className="app-container" maxWidth="xs">
+      <Box className="app-box">{screen}</Box>
     </Container>
   );
 }

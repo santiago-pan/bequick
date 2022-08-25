@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { ExtractScreen, GameScreen, SCREEN_NAME } from "../AppTypes";
 import Mosquito from "../ui/Mosquito";
 import Ko from "../ui/Smoke";
-import forest from "./../../assets/images/forest.jpg";
 import GameOver from "./GameOver";
 
 function resetTimer(timeRef: React.MutableRefObject<number>) {
@@ -38,16 +37,7 @@ export default function Game(props: GameProps) {
 
   return (
     <>
-      <Container
-        sx={{
-          height: "100vh",
-          textAlign: "left",
-          backgroundImage: `url(${forest})`,
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-        }}
-        maxWidth="md"
-      >
+      <Container className="app-game-container" maxWidth="xs">
         {!gameIsOver && (
           <Typography
             color={"white"}

@@ -1,0 +1,45 @@
+.MuiContainer-root.app-container {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url("./../assets/images/background.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.MuiContainer-root.app-game-container {
+  height: 100vh;
+  text-align: left;
+  background-image: url("./../assets/images/background.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.MuiBox-root.app-box {
+  background-color: hsl(var(--primary-light-hsl), 0.9);
+  box-shadow: 0 0 15px 0 hsl(var(--primary-dark-hsl), 0.7);
+  padding: 20px 15px;
+  border-radius: 4px;
+  justify-content: center;
+  text-align: center;
+}
+
+.MuiBox-root.app-game-over-box-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.MuiBox-root.app-game-over-box {
+  display: flex;
+  flex-direction: column;
+  background-color: hsl(var(--primary-light-hsl), 0.9);
+  box-shadow: 0 0 15px 0 hsl(var(--primary-dark-hsl), 0.7);
+  padding: 20px 15px;
+  border-radius: 4px;
+  justify-content: center;
+  text-align: center;
+}
