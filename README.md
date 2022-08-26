@@ -47,3 +47,4 @@ https://bequick.pancarneiro.com/
 
 - If a URL has id, chek with the server that the game is not finished or ongoing
 - If the game is finished or ongoing redirect to some error page or to starting page
+- Add dispatch event for returning to main screen
