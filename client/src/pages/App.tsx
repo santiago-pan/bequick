@@ -311,7 +311,7 @@ function App() {
   }, [socket]);
 
   if (!socket) {
-    return <div>Waiting for socket connection...</div>;
+    return <div></div>;
   }
 
   const screen = ScreenSelector(state);
